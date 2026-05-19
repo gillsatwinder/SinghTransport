@@ -24,7 +24,7 @@ export default async function handler(req, res) {
     // Send mail with defined transport object
     await transporter.sendMail({
       from: `"${name}" <${process.env.EMAIL_USER}>`, // sender address (must be the authenticated user)
-      to: process.env.EMAIL_USER, // list of receivers (send to yourself)
+      to: 'singhtransport0032@gmail.com', // Always send messages TO the client's email
       replyTo: email, // customer's email for easy replies
       subject: `New Contact Form Submission from ${name}`, // Subject line
       text: `Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`, // plain text body
