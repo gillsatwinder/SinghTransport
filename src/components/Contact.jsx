@@ -56,7 +56,7 @@ const Contact = () => {
               <span className="icon">📍</span>
               <div>
                 <strong>Head Office</strong>
-                <p>PunjabIndia</p>
+                <p>Punjab,India</p>
               </div>
             </div>
           </div>
