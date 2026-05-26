@@ -1,5 +1,3 @@
-import nodemailer from 'nodemailer';
-
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -11,28 +9,37 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
-  // Create reusable transporter object using the default SMTP transport
-  let transporter = nodemailer.createTransport({
-    service: 'gmail', // Using Gmail as default SMTP service
-    auth: {
-      user: process.env.EMAIL_USER, // Your email address
-      pass: process.env.EMAIL_PASS, // Your email app password
-    },
-  });
+  if (!process.env.WEB3FORMS_KEY) {
+    return res.status(500).json({ error: 'Server configuration error: Missing Web3Forms Key' });
+  }
 
   try {
-    // Send mail with defined transport object
-    await transporter.sendMail({
-      from: `"${name}" <${process.env.EMAIL_USER}>`, // sender address (must be the authenticated user)
-      to: 'singhtransport0032@gmail.com', // Always send messages TO the client's email
-      replyTo: email, // customer's email for easy replies
-      subject: `New Contact Form Submission from ${name}`, // Subject line
-      text: `Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`, // plain text body
+    // Send data to Web3Forms API
+    const response = await fetch('https://api.web3forms.com/submit', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        access_key: process.env.WEB3FORMS_KEY,
+        name: name,
+        email: email,
+        message: message,
+        subject: `New Contact Form Submission from ${name}`
+      })
     });
 
-    res.status(200).json({ success: true, message: 'Email sent successfully!' });
+    const data = await response.json();
+
+    if (response.status === 200) {
+      res.status(200).json({ success: true, message: 'Email sent successfully!' });
+    } else {
+      console.error('Web3Forms Error:', data.message);
+      res.status(500).json({ error: data.message || 'Failed to send email via Web3Forms' });
+    }
   } catch (error) {
     console.error('Error sending email:', error);
-    res.status(500).json({ error: 'Failed to send email' });
+    res.status(500).json({ error: 'Failed to connect to email service' });
   }
 }
