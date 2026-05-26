@@ -16,19 +16,27 @@ const Contact = () => {
     setStatus({ type: '', message: '' });
 
     try {
-      const response = await fetch('/api/contact', {
+      const response = await fetch('https://api.web3forms.com/submit', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          access_key: '449c017e-38cd-439f-a030-549a10ed7b48',
+          subject: `New Inquiry from ${formData.name}`,
+          from_name: formData.name,
+          ...formData
+        }),
       });
 
       const data = await response.json();
 
-      if (response.ok) {
+      if (response.status === 200) {
         setStatus({ type: 'success', message: 'Message sent successfully!' });
         setFormData({ name: '', email: '', message: '' }); // Clear form
       } else {
-        setStatus({ type: 'error', message: data.error || 'Failed to send message.' });
+        setStatus({ type: 'error', message: data.message || 'Failed to send message.' });
       }
     } catch (error) {
       setStatus({ type: 'error', message: 'An error occurred. Please try again later.' });
